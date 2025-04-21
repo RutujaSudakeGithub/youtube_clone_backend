@@ -16,5 +16,6 @@ const connectDB = async()=>{
 
     }
 }
+//async returns promises
 
 export default connectDB
