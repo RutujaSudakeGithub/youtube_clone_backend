@@ -1,8 +1,20 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
-
 const app = express()
+
+
+// ✅ Body parser middleware — must come BEFORE your routes
+app.use(express.json()); // for parsing application/json
+app.use(express.urlencoded({ extended: true })); 
+
+
+
+
+
+
+
+
 
 //app.use() -> is basically used for configurations or middlewares
 app.use(cors({
@@ -21,6 +33,7 @@ app.use(express.static("public"))
 
 //to access and set cookies of user browser by using server
 app.use(cookieParser())
+
 
 //import routes
 import userRouter from "./routes/user.routes.js"
