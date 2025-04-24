@@ -164,7 +164,7 @@ const logoutUser = asyncHandler(async(req,res)=>{
     .status(200)
     .clearCookie("accessToken",options)
     .clearCookie("refreshToken",options)
-    .json(200,{},"User logged out")
+    .json(new apiResponse(200,{},"User logged out"))
 })
 
 const refreshAccessToken = asyncHandler(async(req,res)=>{
@@ -244,7 +244,7 @@ const updateAccountDetail = asyncHandler(async(res,req)=>{
         throw new ApiError(400,"All fields are requried")
     }
 
-   const user = User.findByIdAndUpdate( 
+   const user = await User.findByIdAndUpdate( 
         req.user?._id,
         {
             $set:{
@@ -327,5 +327,6 @@ export {registerUser,
     refreshAccessToken,
     changeCurrentPassword,
     getCurrentUser,
-    updateUserAvatar
+    updateUserAvatar,
+    updateUserCoverImage
 }
