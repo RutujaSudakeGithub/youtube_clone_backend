@@ -395,6 +395,60 @@ const getUserChannelProfile = asyncHandler(async (req,res) => {
     
 })
 
+const getWatchHistory = asyncHandler(async(req,res)=>{
+    const user = await User.aggregate(
+        [
+            {
+                $match:{
+                    _id: mongoose.Types.ObjectId(req.user._id)
+                }
+            },
+            {
+                $lookup:{
+                    from:"videos",
+                    localField:"watchHistory",
+                    foreignField:"_id",
+                    as:"watchHistory",
+
+                    pipeline:[
+                        {
+                            $lookup:{
+                                from:"users",
+                                localField:"owner",
+                                foreignField:"_id",
+                                as:"owner",
+                                pipeline:[
+                                    {
+                                        $project:{
+                                            fullname:1,
+                                            username:1,
+                                            avatar
+                                        }
+                                    }
+                                ]
+
+                            }
+                        },
+                        {
+                            $addFields:{
+                                owner:{
+                                    $first:"owner"
+                                }
+                            }
+                        }
+
+                    ]
+                }
+            }
+        ]
+    )
+    return res
+    .status(200)
+    .json(new apiResponse(200,user[0].watchHistory),
+        "Watch History feteched successfully")
+
+})
+
 export {registerUser,
     loginUser,
     logoutUser,
@@ -403,5 +457,7 @@ export {registerUser,
     getCurrentUser,
     updateUserAvatar,
     updateUserCoverImage,
-    getUserChannelProfile
-}
+    getUserChannelProfile,
+    getWatchHistory
+
+}   
