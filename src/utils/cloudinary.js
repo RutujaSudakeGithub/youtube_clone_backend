@@ -1,6 +1,7 @@
-import {v2 as cloudinary} from "cloudinary"
+import {v2 as cloudinary} from "cloudinary" // import v2 version of cloudinary library and named as cloudinary
 import fs from "fs"
 
+// These credentials are necessary to authenticate your API requests.
 cloudinary.config({ 
     cloud_name: process.env.CLOUDNARY_NAME, 
     api_key: process.env.CLOUDNARY_KEY, 

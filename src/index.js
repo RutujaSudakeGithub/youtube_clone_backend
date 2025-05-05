@@ -14,7 +14,7 @@ dotenv.config(
 // connectDB is async function which return promises
 connectDB()
 .then(()=>{
-    app.listen(process.env.PORT || 8000,()=>{
+    app.listen(process.env.PORT || 8000,()=>{  //to connect with the port 
         console.log(`Server is running at port :${process.env.PORT}`)
     })
 })
@@ -25,7 +25,12 @@ connectDB()
 
 
 
-
+// We are going to run code by using index.js 
+// dotenv is added in this code ,beacuse every file should use dotenv data
+// connectDB() is a function written in ./db/index.js
+// which async function used to connect with mongodb database
+// connectDB() return promises if promis is resolved we are connecting to the port
+//else rejected then showing rejection message
 
 
 

@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken"
 import mongoose from "mongoose";
 import { app } from "../app.js";
 import { error } from "console";
-import { channel } from "process";
+// import { channel } from "process";
 import { channel, subscribe } from "diagnostics_channel";
 
 
@@ -98,9 +98,9 @@ const loginUser = asyncHandler(async(req,res)=>{
     // check the password
     //access and refresh token
     //send cookie
-
-    const {username,password,email} = req.body 
-    console.log(username)
+    // console.log(req.body)
+    const{username,password,email} = req.body 
+    
 
     if(!username && !email){
         throw new ApiError(400,"username or email is requried")
@@ -150,8 +150,8 @@ const logoutUser = asyncHandler(async(req,res)=>{
     User.findOneAndUpdate(
         req.user._id,
         {
-            $set:{
-                refreshToken:undefined
+            $unset:{
+                refreshToken:1
             }
         },
         {

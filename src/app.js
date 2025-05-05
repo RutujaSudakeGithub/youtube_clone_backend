@@ -9,18 +9,13 @@ app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); 
 
 
-
-
-
-
-
-
-
 //app.use() -> is basically used for configurations or middlewares
 app.use(cors({
-    origin : process.env.CORS_ORIGIN, // we can define origin of request 
-    credentials:true
+    origin : process.env.CORS_ORIGIN, // allows only requests from the domain you set in the .env file. 
+    credentials:true //allows cookies and authorization headers to be sent across domains.
+
 }))
+
 //to accpet jsonn data from frontend
 app.use(express.json({limit:"16kb"}))
 

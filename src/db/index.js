@@ -6,7 +6,7 @@ const connectDB = async()=>{
     console.log(`Mongo connection ${process.env.Mongo_DB_URL}`)
     try{
         const connectionInstance = await mongoose.connect(`${process.env.Mongo_DB_URL}/${DB_NAME}`)
-        // console.log(`Mongo connection ${process.env.Mongo_DB_URL}`)
+        // console.log(connectionInstance)
         console.log(`MongoDB is connected !! DB HOST : ${connectionInstance.connection.host}`)
 
     }
@@ -18,4 +18,9 @@ const connectDB = async()=>{
 }
 //async returns promises
 
+
 export default connectDB
+
+//in this code async function is written to connect with mongodb database
+//process.env.Mongo_DB_URL- connection URL is present 
+//connectionInstance.connection.host-> returns the host name
