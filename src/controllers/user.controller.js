@@ -10,13 +10,24 @@ import { error } from "console";
 // import { channel } from "process";
 import { channel, subscribe } from "diagnostics_channel";
 
+// User logs in → server generates access + refresh tokens.
+// Server stores refresh token in user.refreshToken in DB.
+// Client stores refresh token in a cookie or secure storage.
+// When access token expires, client sends refresh token → 
+// server checks DB user.refreshToken → if valid, gives a new access token.
 
 const generateAccessAndRefreshToken = async(userID)=>{
     try{
+        //load user documnet from database
         const user = await User.findById(userID)
+
         const accessToken = user.generateAccessToken()
         const refreshToken = user.generateRefreshToken();
+        
+        // updates only the in-memory object
         user.refreshToken=refreshToken
+
+        //skip the validation and store the data as it is into database
         await user.save({validateBeforeSave: false})
 
         return {accessToken,refreshToken}
