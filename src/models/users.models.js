@@ -97,7 +97,7 @@ userSchema.methods.generateAccessToken=function(){
     )
 }
 
-//hen when the access token expires, the client can send the refresh token to get a 
+// when the access token expires, the client can send the refresh token to get a 
 // new access token without forcing the user to log in again.
 userSchema.method.generateRefrshToken=function(){
     return jwt.sign(
