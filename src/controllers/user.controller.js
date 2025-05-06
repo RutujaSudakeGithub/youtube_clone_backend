@@ -41,32 +41,48 @@ const registerUser = asyncHandler(async (req,res)=>{
     const{username,email,fullname,password}=req.body
     // console.log(`Username :${username}`)
 
+    //item iterate on array , if any empty string is present then it returns false, else true
+    //  in this case for any one empty string it return false and error is shown to user
     if(
         [ username,email,fullname,password].some((item)=>item?.trim()==="")
     ){
         throw new ApiError(400,"All fields are requried")
     }
 
+    // this is mongoDB query to find user in 'User' collection that match 
+    // either username or password you pass in
     const findeUserName = await User.findOne({
         $or : [{username},{password}]
     })
 
+    //If found user with username and password 
+    //then we are showing following error
     if(findeUserName){
         throw new ApiError(409,"User with this email and username is already exists")
     }
+
+    // This code is trying to extarct file paths from incoming request that contain uploded file
+    //middleware multer
     const avatarLocalPath = req.files?.avatar[0]?.path
     const coverImageLocalPath = req.files?.coverimage[0]?.path
 
+    // is avatar imahe path is not available then showing error
     if(!avatarLocalPath){
         throw new ApiError(400,"Avatar image is requried")
     }
 
+    //by sending the path of avtar and cover image ,uploading images to cloudinary
+    //and its result is stored into avatar and coverimage variable
     const avatar = await uploadCloudinary(avatarLocalPath)
     const coverimage = await uploadCloudinary(coverImageLocalPath)
+
 
     if(!avatar){
         throw new ApiError(400,"Avatar file is requried")
     }
+
+    // create new document into the database using following  objects
+    //User.create - mongoDB method
 
     const user = await User.create({
         username : username.toLowerCase(),
@@ -77,19 +93,26 @@ const registerUser = asyncHandler(async (req,res)=>{
         coverimage
     })
 
+    //findById is searching user id into database ,createduser varible stores complete data of user 
+    // instead of password and refreshtoken
+
     const createdUser = await User.findById(user._id).select(
         "-password -refreshToken"
     )
+    //if user is not found then showing error
 
     if(!createdUser){
         throw new ApiError(500,"Something went wrong while registering the user")
     }
 
+    // e;se showing message of user is created 
     return res.status(201).json(
         new apiResponse(200,createdUser,"User Registered Successfully")
     )
 
 })
+
+
 
 const loginUser = asyncHandler(async(req,res)=>{
     //req body -> data
@@ -99,36 +122,50 @@ const loginUser = asyncHandler(async(req,res)=>{
     //access and refresh token
     //send cookie
     // console.log(req.body)
+
+    //destructuring
+    //extracting data of username , password,email from req.body
     const{username,password,email} = req.body 
     
-
+    //checking username and password
     if(!username && !email){
         throw new ApiError(400,"username or email is requried")
     }
 
+    // searching fro username and email from User collection
+    // storing ouput into user varible
     const user = await User.findOne({
         $or:[{username},{email}]
     })
 
+    // if user is not available then showing error
     if(!user){
         throw new ApiError(404,"User does not exists")
     }
 
+    // calling is passwordCorrect method implemented in users.model
     const isPasswordvalid = await user.isPasswordCorrect(password)
+    //check for password
     if(!isPasswordvalid){
         throw new ApiError(401,"Invalid user credentials")
     }
+
+    //calling method generateAccessAndRefreshToken implemneted in users.controller.js
+    // which return accessToken and refreshToken
     const{accessToken,refreshToken}=await generateAccessAndRefreshToken(user._id)
     
+    //extracting data of user and storing it into loggedUser
     const loggedUser = await User.findById(user._id).select("-password -refreshToken");
 
 
     // cookies are only modify on server
+    //used when setting cookies in an HTTP response
     const options={
         httpOnly : true,
         secure : true
     }
 
+    //response send to user 
     return res
     .status(200)
     .cookie("accessToken",accessToken,options)
