@@ -184,20 +184,27 @@ const loginUser = asyncHandler(async(req,res)=>{
 })
 
 const logoutUser = asyncHandler(async(req,res)=>{
+
+// Finds one document that matches the first argument (the query).
+// Updates it using the second argument (the update instructions).
+// Returns the updated document (or the original, depending on options).
+
     User.findOneAndUpdate(
-        req.user._id,
+        req.user._id,  //find documnet using user id 
         {
             $unset:{
-                refreshToken:1
+                refreshToken:1  // delete the refresh token
             }
         },
         {
-            new :true
+            new :true // to return updated documnet
         }
     )
+
     const options={
         httpOnly : true,
         secure : true
+    
     }
     return res
     .status(200)
@@ -250,51 +257,66 @@ const refreshAccessToken = asyncHandler(async(req,res)=>{
 })
 
 const changeCurrentPassword = asyncHandler(async(req,res)=>{
+
+    // destrcturing data from req.body
     const {oldPassword,newPassword,confPassword} =req.body
 
+    //checking new password is write or wrong 
     if(newPassword!==confPassword){
         throw new apiResponse(400,"New password and confrimed password does not match")
     }
 
+    //finding user using -id and storing it into user variable
     const user = await User.findById(req.user?._id)
+
+    //checking inputed old password is correct or not 
     const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
+    
+    // if oldPassword is not correct then showing error
     if(!isPasswordCorrect){
         throw new ApiError(400,"Invalid old password")
     }
-
+    //if it is correct then assigning newPassword to password feild
     user.password=newPassword
     await user.save({validateBeforeSave:false})
 
+    //returing response
     return res
     .status(200)
     .json(new apiResponse(200,{},"password change successfully"))
 })
 
 const getCurrentUser = asyncHandler(async(req,res)=>{
+    //is an Express route handler wrapped in asyncHandler, which helps catch async errors.
+    //req.user->set by your authentication middleware 
+    //It contains the currently authenticated user’s data
     return res
     .status(200)
-    .json(200,req.user,"current user fetched successfully")
+    .json(new apiResponse(200,req.user,"current user fetched successfully"))
 })
 
 const updateAccountDetail = asyncHandler(async(res,req)=>{
+    //destructing data 
     const {fullname,email} =req.body
-
+    
+    //check for fullname and email
     if(!fullname ||!email){
         throw new ApiError(400,"All fields are requried")
     }
 
+    //
    const user = await User.findByIdAndUpdate( 
-        req.user?._id,
+        req.user?._id, //find documnet using user_id
         {
             $set:{
-                fullname,
-                email
+                fullname, //updating fullname and email
+                email     
             }
         },
         {
-            new : true
+            new : true   //returns updated document
         }
-    ).select("-password")
+    ).select("-password")  // dont allow password to show
 
     return res
     .status(200)
@@ -302,18 +324,23 @@ const updateAccountDetail = asyncHandler(async(res,req)=>{
 })
 
 const updateUserAvatar= asyncHandler(async(res,req)=>{
+    // extracting file path
     const avatarLocalPath = req.file?.path
 
+    //check for file path
     if(!avatarLocalPath){
         throw new ApiError(400,"Avatar file is missing")
     }
-
+    
+    //upload on cloudinary and storing response in avatar variable
     const avatar = await uploadCloudinary(avatarLocalPath)
 
+    //check for url generated on cloudinary
     if(!avatar.url){
         throw new ApiError(400,"Error while uploading on avatar")
     }
 
+    // updating url
     const user = await User.findByIdAndUpdate( 
         req.user._id,
         {
@@ -362,8 +389,10 @@ const updateUserCoverImage =asyncHandler(async(req,res)=>{
 })
 
 const getUserChannelProfile = asyncHandler(async (req,res) => {
+    //It extracts the username value directly into a variable you can use in your handler.
     const {username} = req.params
 
+    // check for the username , trim() trims space in username
     if(!username?.trim()){
         throw new ApiError(400,"Username is missing")
     }
