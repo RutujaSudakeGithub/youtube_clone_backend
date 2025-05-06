@@ -21,9 +21,9 @@ export const verifyJWT = asyncHandler(async(req,res,next)=>{
         //If the token is invalid or expired, it will throw an error, which is caught in the catch block.
         const decodedToken = jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
         
-        //If no user is found with that ID (maybe the user was deleted), it throws an Invalid access token error.
         const user = await User.findById(decodedToken?._id).select("-password -refreshToken")
     
+        //If no user is found with that ID (maybe the user was deleted), it throws an Invalid access token error.
         if(!user){
             throw new ApiError(401,"Invalid access token")
         }
